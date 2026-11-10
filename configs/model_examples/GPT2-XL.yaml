@@ -1,0 +1,55 @@
+# GPT2-XL: ADC noise sweep
+
+model:
+  builder: workloads.models:build_model
+  name: GPT2-XL
+
+dataset:
+  loader: workloads.dataset:get_llm_dataloader
+  params:              # calibration
+    batch_size: 4
+    num_workers: 2
+    deterministic_dataloader: true
+    block_size: 128
+  eval_params:         # sweep
+    batch_size: 8
+    num_workers: 2
+    deterministic_dataloader: true
+    block_size: 128
+
+evaluation:
+  mode: next_token
+  metric_fn: accuracim.evaluation:update_performance_metrics
+
+input_stats:
+  N: 64
+  override: false
+
+adc_stats:
+  N: 32
+  override: false
+
+precise_mode_noise_sources:
+  - input_quantize
+  - weight_quantize
+  - adc_quantize
+
+params_grid_list:
+  - input_bits: [10]
+    weight_bits: [8]
+    input_clip_percentile: [100]
+    weight_clip_percentile: [100]
+    differential_weight: [true]
+    weight_slice_lsb_to_msb: [2]
+    input_slice_lsb_to_msb: [5]
+    adc_physical_noise:
+      - {type: StateIndependentNoise, sweep: {start: 2.8e-6, stop: 9.3e-6, step: 5e-7}}
+    adc_clip_percentile: [100]
+    adc_reference_mode: [layer]
+
+run:
+  N: 1930
+  mode: estimate
+  save_result: true
+  reuse_models: false   # fits a 24 GB GPU
+name: GPT2-XL

@@ -1,0 +1,61 @@
+# Weight conductance drift sweep -- no additive noise.
+# Calibration is deliberately NOT redone per drift value: the ADC and input
+# quantization ranges are learned once on the undrifted array and left fixed,
+# which is the physical assumption being tested.
+
+model:
+  builder: workloads.models:build_model
+  name: ResNet18
+
+dataset:
+  loader: workloads.dataset:get_imagenet_dataloader
+  params:
+    batch_size: 24
+    num_workers: 2
+    deterministic_dataloader: true
+  eval_params:
+    batch_size: 512
+    num_workers: 2
+    deterministic_dataloader: true
+
+input_stats:
+  N: 128
+  override: false
+
+adc_stats:
+  N: 128
+  override: false
+
+precise_mode_noise_sources:
+  - input_quantize
+  - weight_quantize
+  - adc_quantize
+
+params_grid_list:
+  - input_bits: [8]
+    input_clip_percentile: [100]
+    weight_clip_percentile: [100]
+    weight_bits: [8]
+    differential_weight: [true]
+    weight_slice_lsb_to_msb: [2]
+    input_slice_lsb_to_msb: [2]
+    adc_clip_percentile: [100]
+    adc_reference_mode: [layer]
+    weight_drift:
+     - type: ConductanceDrift
+       args: [0.0]
+     - type: ConductanceDrift
+       args: [0.01]
+     - type: ConductanceDrift
+       args: [0.02]
+     - type: ConductanceDrift
+       args: [0.04]
+     - type: ConductanceDrift
+       args: [0.08]
+     - type: ConductanceDrift
+       args: [0.16]
+
+run:
+  N: 50000
+  mode: simulate
+  save_result: true

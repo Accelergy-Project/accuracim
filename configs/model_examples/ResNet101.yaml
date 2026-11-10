@@ -1,0 +1,48 @@
+# ResNet101: ADC noise sweep
+
+model:
+  builder: workloads.models:build_model
+  name: ResNet101
+
+dataset:
+  loader: workloads.dataset:get_imagenet_dataloader
+  params:              # calibration
+    batch_size: 32
+    num_workers: 4
+    deterministic_dataloader: true
+  eval_params:         # sweep
+    batch_size: 200
+    num_workers: 4
+    deterministic_dataloader: true
+
+input_stats:
+  N: 256
+  override: false
+
+adc_stats:
+  N: 32
+  override: false
+
+precise_mode_noise_sources:
+  - input_quantize
+  - weight_quantize
+  - adc_quantize
+
+params_grid_list:
+  - input_bits: [10]
+    weight_bits: [10]
+    input_clip_percentile: [100]
+    weight_clip_percentile: [100]
+    differential_weight: [true]
+    weight_slice_lsb_to_msb: [2]
+    input_slice_lsb_to_msb: [2]
+    adc_physical_noise:
+      - {type: StateIndependentNoise, sweep: {start: 1.4e-5, stop: 4.4e-5, step: 2e-6}}
+    adc_clip_percentile: [100]
+    adc_reference_mode: [layer]
+
+run:
+  N: 50000
+  mode: estimate
+  save_result: true
+name: ResNet101

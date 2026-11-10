@@ -1,0 +1,62 @@
+# Weight conductance drift sweep -- no additive noise.
+# Calibration is deliberately NOT redone per drift value: the ADC and input
+# quantization ranges are learned once on the undrifted array and left fixed,
+# which is the physical assumption being tested.
+
+model:
+  builder: workloads.models:build_model
+  name: GPT2-Medium
+
+dataset:
+  loader: workloads.dataset:get_llm_dataloader
+  params:
+    batch_size: 32
+    num_workers: 2
+    deterministic_dataloader: true
+    block_size: 128
+  eval_params:
+    batch_size: 32
+    num_workers: 2
+    deterministic_dataloader: true
+    block_size: 128
+
+evaluation:
+  mode: next_token
+  metric_fn: accuracim.evaluation:update_performance_metrics
+
+input_stats:
+  N: 128
+  override: true
+
+adc_stats:
+  N: 128
+  override: true
+
+precise_mode_noise_sources:
+  - input_quantize
+  - weight_quantize
+  - adc_quantize
+
+params_grid_list:
+  - input_bits: [12]
+    input_clip_percentile: [99.9995]
+    weight_clip_percentile: [100.0]
+    weight_bits: [10]
+    differential_weight: [true]
+    weight_slice_lsb_to_msb: [2]
+    input_slice_lsb_to_msb: [6]
+    adc_clip_percentile: [100.0]
+    adc_reference_mode: [layer]
+    weight_drift:
+     - type: ConductanceDrift
+       args: [0.01]
+     - type: ConductanceDrift
+       args: [0.02]
+     - type: ConductanceDrift
+       args: [0.03]
+     - type: ConductanceDrift
+       args: [0.04]
+run:
+  N: 2000
+  mode: simulate
+  save_result: true

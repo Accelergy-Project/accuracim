@@ -1,0 +1,56 @@
+# Qwen2.5-0.5B: ADC noise sweep
+
+model:
+  builder: workloads.models:build_model
+  name: Qwen2.5-0.5B
+
+dataset:
+  loader: workloads.dataset:get_llm_dataloader
+  params:              # calibration
+    batch_size: 4
+    num_workers: 2
+    deterministic_dataloader: true
+    block_size: 128
+    tokenizer: Qwen/Qwen2.5-0.5B
+  eval_params:         # sweep
+    batch_size: 8
+    num_workers: 2
+    deterministic_dataloader: true
+    block_size: 128
+    tokenizer: Qwen/Qwen2.5-0.5B
+
+evaluation:
+  mode: next_token
+  metric_fn: accuracim.evaluation:update_performance_metrics
+
+input_stats:
+  N: 64
+  override: false
+
+adc_stats:
+  N: 32
+  override: false
+
+precise_mode_noise_sources:
+  - input_quantize
+  - weight_quantize
+  - adc_quantize
+
+params_grid_list:
+  - input_bits: [14]
+    weight_bits: [10]
+    input_clip_percentile: [100]
+    weight_clip_percentile: [100]
+    differential_weight: [true]
+    weight_slice_lsb_to_msb: [2]
+    input_slice_lsb_to_msb: [7]
+    adc_physical_noise:
+      - {type: StateIndependentNoise, sweep: {start: 1.6e-6, stop: 4.8e-6, step: 2e-7}}
+    adc_clip_percentile: [100]
+    adc_reference_mode: [layer]
+
+run:
+  N: 2046
+  mode: estimate
+  save_result: true
+name: Qwen2.5-0.5B

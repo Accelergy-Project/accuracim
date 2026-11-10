@@ -1,0 +1,56 @@
+# SmolLM2-360M: ADC noise sweep
+
+model:
+  builder: workloads.models:build_model
+  name: SmolLM2-360M
+
+dataset:
+  loader: workloads.dataset:get_llm_dataloader
+  params:              # calibration
+    batch_size: 16
+    num_workers: 2
+    deterministic_dataloader: true
+    block_size: 128
+    tokenizer: HuggingFaceTB/SmolLM2-360M
+  eval_params:         # sweep
+    batch_size: 32
+    num_workers: 2
+    deterministic_dataloader: true
+    block_size: 128
+    tokenizer: HuggingFaceTB/SmolLM2-360M
+
+evaluation:
+  mode: next_token
+  metric_fn: accuracim.evaluation:update_performance_metrics
+
+input_stats:
+  N: 64
+  override: false
+
+adc_stats:
+  N: 32
+  override: false
+
+precise_mode_noise_sources:
+  - input_quantize
+  - weight_quantize
+  - adc_quantize
+
+params_grid_list:
+  - input_bits: [16]
+    weight_bits: [10]
+    input_clip_percentile: [100]
+    weight_clip_percentile: [100]
+    differential_weight: [true]
+    weight_slice_lsb_to_msb: [2]
+    input_slice_lsb_to_msb: [8]
+    adc_physical_noise:
+      - {type: StateIndependentNoise, sweep: {start: 9e-7, stop: 2.5e-6, step: 2e-7}}
+    adc_clip_percentile: [100]
+    adc_reference_mode: [layer]
+
+run:
+  N: 2074
+  mode: estimate
+  save_result: true
+name: SmolLM2-360M

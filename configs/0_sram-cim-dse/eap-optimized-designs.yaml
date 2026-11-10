@@ -1,0 +1,192 @@
+# Example config for CIM experiments
+
+model:
+  builder: workloads.models:build_model
+  name: ResNet18
+
+dataset:
+  loader: workloads.dataset:get_imagenet_dataloader
+  params:
+    batch_size: 24
+    num_workers: 2
+    deterministic_dataloader: true
+  eval_params:
+    batch_size: 512
+    num_workers: 2
+    deterministic_dataloader: true
+
+# Optional: override evaluation mode or metric function
+# evaluation:
+#   mode: classification
+#   metric_fn: accuracim.evaluation:update_performance_metrics
+
+paths:
+  # relative to the working directory (or CIM_ROOT)
+  # calibrated_dir: calibrated_config/ResNet18
+  # cache_dir: cache
+
+input_stats:
+  N: 512
+  override: false
+
+adc_stats:
+  N: 512
+  override: false
+
+precise_mode_noise_sources:
+  - input_quantize
+  - weight_quantize
+  - adc_quantize
+
+params_grid_list:
+  - input_bits: [8]
+    input_clip_percentile: [99.999]
+    weight_clip_percentile: [99.999]
+    weight_bits: [8]
+    differential_weight: [true]
+    weight_slice_lsb_to_msb: [1]
+    input_slice_lsb_to_msb: [8]
+    num_rows: [1152]
+    # SRAM 32nm (high-K metal gate)
+    weight_physical_noise:
+     - type: ProportionalNoise
+       args: [0.02128]
+    # Input 8-bit DAC from Signal-to-Noise Ratio.
+    # Stdev. Error relative to full scale range (2^8 - 1) = 1/sqrt(8*10^(SNR/10))
+    input_physical_noise:
+     - type: StateIndependentNoise
+       args: [0.000141]
+    # 12-bit ADC from Signal-to-Noise Ratio.
+    # Stdev. Error relative to full scale range (2^12 - 1) = 1/sqrt(8*10^(SNR/10))
+    adc_physical_noise:
+     - type: StateIndependentNoise
+       args: [0.00000284]
+    # ADC configuration
+    adc_bits: [12]
+    adc_clip_percentile: [99.999]
+    adc_reference_mode: [layer]
+  - input_bits: [8]
+    input_clip_percentile: [99.999]
+    weight_clip_percentile: [99.999]
+    weight_bits: [8]
+    differential_weight: [true]
+    weight_slice_lsb_to_msb: [1]
+    input_slice_lsb_to_msb: [8]
+    num_rows: [1152]
+    weight_physical_noise:
+     - type: ProportionalNoise
+       args: [0.02128]
+    input_physical_noise:
+     - type: StateIndependentNoise
+       args: [0.000140752]
+    adc_physical_noise:
+     - type: StateIndependentNoise
+       args: [7.136E-05]
+    adc_bits: [12]
+    adc_clip_percentile: [99.999]
+    adc_reference_mode: [layer]
+  - input_bits: [8]
+    input_clip_percentile: [99.999]
+    weight_clip_percentile: [99.999]
+    weight_bits: [8]
+    differential_weight: [true]
+    weight_slice_lsb_to_msb: [1]
+    input_slice_lsb_to_msb: [8]
+    num_rows: [1152]
+    weight_physical_noise:
+     - type: ProportionalNoise
+       args: [0.0301]
+    input_physical_noise:
+     - type: StateIndependentNoise
+       args: [0.000140752]
+    adc_physical_noise:
+     - type: StateIndependentNoise
+       args: [7.136E-05]
+    adc_bits: [12]
+    adc_clip_percentile: [99.999]
+    adc_reference_mode: [layer]
+  - input_bits: [8]
+    input_clip_percentile: [99.999]
+    weight_clip_percentile: [99.999]
+    weight_bits: [8]
+    differential_weight: [true]
+    weight_slice_lsb_to_msb: [1]
+    input_slice_lsb_to_msb: [8]
+    num_rows: [1152]
+    weight_physical_noise:
+     - type: ProportionalNoise
+       args: [0.04257]
+    input_physical_noise:
+     - type: StateIndependentNoise
+       args: [0.000140752]
+    adc_physical_noise:
+     - type: StateIndependentNoise
+       args: [7.136E-05]
+    adc_bits: [12]
+    adc_clip_percentile: [99.999]
+    adc_reference_mode: [layer]
+  - input_bits: [8]
+    input_clip_percentile: [99.999]
+    weight_clip_percentile: [99.999]
+    weight_bits: [8]
+    differential_weight: [true]
+    weight_slice_lsb_to_msb: [1]
+    input_slice_lsb_to_msb: [8]
+    num_rows: [1152]
+    weight_physical_noise:
+     - type: ProportionalNoise
+       args: [0.04257]
+    input_physical_noise:
+     - type: StateIndependentNoise
+       args: [0.001407521]
+    adc_physical_noise:
+     - type: StateIndependentNoise
+       args: [7.136E-05]
+    adc_bits: [12]
+    adc_clip_percentile: [99.999]
+    adc_reference_mode: [layer]
+  - input_bits: [8]
+    input_clip_percentile: [99.999]
+    weight_clip_percentile: [99.999]
+    weight_bits: [8]
+    differential_weight: [true]
+    weight_slice_lsb_to_msb: [1]
+    input_slice_lsb_to_msb: [8]
+    num_rows: [1152]
+    weight_physical_noise:
+     - type: ProportionalNoise
+       args: [0.0602]
+    input_physical_noise:
+     - type: StateIndependentNoise
+       args: [0.000140752]
+    adc_physical_noise:
+     - type: StateIndependentNoise
+       args: [7.136E-05]
+    adc_bits: [12]
+    adc_clip_percentile: [99.999]
+    adc_reference_mode: [layer]
+  - input_bits: [8]
+    input_clip_percentile: [99.999]
+    weight_clip_percentile: [99.999]
+    weight_bits: [8]
+    differential_weight: [true]
+    weight_slice_lsb_to_msb: [1]
+    input_slice_lsb_to_msb: [8]
+    num_rows: [1152]
+    weight_physical_noise:
+     - type: ProportionalNoise
+       args: [0.0602]
+    input_physical_noise:
+     - type: StateIndependentNoise
+       args: [0.001407521]
+    adc_physical_noise:
+     - type: StateIndependentNoise
+       args: [7.136E-05]
+    adc_bits: [12]
+    adc_clip_percentile: [99.999]
+    adc_reference_mode: [layer]
+
+run:
+  N: 50000
+  mode: simulate
+  save_result: true

@@ -1,0 +1,54 @@
+# DistilGPT2: ADC noise sweep
+
+model:
+  builder: workloads.models:build_model
+  name: DistilGPT2
+
+dataset:
+  loader: workloads.dataset:get_llm_dataloader
+  params:              # calibration
+    batch_size: 16
+    num_workers: 2
+    deterministic_dataloader: true
+    block_size: 128
+  eval_params:         # sweep
+    batch_size: 32
+    num_workers: 2
+    deterministic_dataloader: true
+    block_size: 128
+
+evaluation:
+  mode: next_token
+  metric_fn: accuracim.evaluation:update_performance_metrics
+
+input_stats:
+  N: 64
+  override: false
+
+adc_stats:
+  N: 64
+  override: false
+
+precise_mode_noise_sources:
+  - input_quantize
+  - weight_quantize
+  - adc_quantize
+
+params_grid_list:
+  - input_bits: [10]
+    weight_bits: [10]
+    input_clip_percentile: [100]
+    weight_clip_percentile: [100]
+    differential_weight: [true]
+    weight_slice_lsb_to_msb: [2]
+    input_slice_lsb_to_msb: [5]
+    adc_physical_noise:
+      - {type: StateIndependentNoise, sweep: {start: 1e-8, stop: 1e-3, num: 16, scale: log}}
+    adc_clip_percentile: [100]
+    adc_reference_mode: [layer]
+
+run:
+  N: 1930
+  mode: estimate
+  save_result: true
+name: DistilGPT2

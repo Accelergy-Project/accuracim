@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "accuracim"
+version = "0.1.0"
+description = "Fast and precise estimation of Compute-in-Memory accuracy loss"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+dependencies = [
+    "torch",
+    "torchvision",
+    "transformers",
+    "tokenizers",
+    "datasets",
+    "huggingface-hub",
+    "numpy",
+    "scipy",
+    "pandas",
+    "openpyxl",
+    "pyyaml",
+    "tqdm",
+    "nvidia-ml-py",
+]
+
+[project.scripts]
+accuracim = "accuracim.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.black]
+line-length = 100
+target-version = ["py310"]

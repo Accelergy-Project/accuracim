@@ -1,0 +1,67 @@
+# Example config for CIM experiments
+
+model:
+  builder: workloads.models:build_model
+  name: GPT2-Medium
+
+dataset:
+  loader: workloads.dataset:get_llm_dataloader
+  params:
+    batch_size: 32
+    num_workers: 2
+    deterministic_dataloader: true
+    block_size: 128
+  eval_params:
+    batch_size: 32
+    num_workers: 2
+    deterministic_dataloader: true
+    block_size: 128
+
+# Optional: override evaluation mode or metric function
+evaluation:
+  mode: next_token
+  metric_fn: accuracim.evaluation:update_performance_metrics
+
+paths:
+  # relative to the working directory (or CIM_ROOT)
+  # calibrated_dir: calibrated_config/GPT2-Small
+  # cache_dir: cache
+
+input_stats:
+  N: 512
+  override: true
+
+adc_stats:
+  N: 512
+  override: true
+
+precise_mode_noise_sources:
+  - input_quantize
+  - weight_quantize
+  - adc_quantize
+
+params_grid_list:
+  - weight_clip_percentile: [100.0]
+    weight_bits: [10]
+    differential_weight: [true]
+    weight_slice_lsb_to_msb: [2]
+    weight_physical_noise:
+    - type: StateIndependentNoise
+      args: [0.0001]
+    - type: StateIndependentNoise
+      args: [0.0002]
+    - type: StateIndependentNoise
+      args: [0.0003]
+    - type: StateIndependentNoise
+      args: [0.0004]
+    - type: StateIndependentNoise
+      args: [0.0006]
+    - type: StateIndependentNoise
+      args: [0.0008]
+    - type: StateIndependentNoise
+      args: [0.001]
+
+run:
+  N: 2000
+  mode: estimate
+  save_result: true

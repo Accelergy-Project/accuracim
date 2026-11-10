@@ -1,0 +1,84 @@
+# Example config for CIM experiments
+
+model:
+  builder: workloads.models:build_model
+  name: GPT2-Large
+
+dataset:
+  loader: workloads.dataset:get_llm_dataloader
+  params:
+    batch_size: 16
+    num_workers: 2
+    deterministic_dataloader: true
+    block_size: 128
+  eval_params:
+    batch_size: 16
+    num_workers: 2
+    deterministic_dataloader: true
+    block_size: 128
+
+# Optional: override evaluation mode or metric function
+evaluation:
+  mode: next_token
+  metric_fn: accuracim.evaluation:update_performance_metrics
+
+paths:
+  # relative to the working directory (or CIM_ROOT)
+  # calibrated_dir: calibrated_config/GPT2-Large
+  # cache_dir: cache
+
+input_stats:
+  N: 512
+  override: false
+
+adc_stats:
+  N: 512
+  override: false
+
+precise_mode_noise_sources:
+  - input_quantize
+  - weight_quantize
+  - adc_quantize
+
+params_grid_list:
+  - input_bits: [12]
+    input_clip_percentile: [99.9999]
+    weight_clip_percentile: [99.9999]
+    weight_bits: [12]
+    differential_weight: [true]
+    weight_slice_lsb_to_msb: [4]
+    input_slice_lsb_to_msb: [6]
+    weight_physical_noise:
+     - type: ProportionalNoise
+       args: [0.02]
+     - type: ProportionalNoise
+       args: [0.04]
+     - type: ProportionalNoise
+       args: [0.08]
+     - type: ProportionalNoise
+       args: [0.16]
+    input_physical_noise:
+     - type: StateIndependentNoise
+       args: [0.0001]
+     - type: StateIndependentNoise
+       args: [0.0005]
+     - type: StateIndependentNoise
+       args: [0.001]
+     - type: StateIndependentNoise
+       args: [0.0015]
+    adc_physical_noise:
+      - type: StateIndependentNoise
+        args: [0.000001]
+      - type: StateIndependentNoise
+        args: [0.000002]
+      - type: StateIndependentNoise
+        args: [0.000004]
+      - type: StateIndependentNoise
+        args: [0.000008]
+    adc_clip_percentile: [100.0]
+    adc_reference_mode: [layer]
+
+run:
+  N: 2000
+  mode: estimate
+  save_result: true

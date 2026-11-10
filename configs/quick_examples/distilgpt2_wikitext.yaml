@@ -1,0 +1,43 @@
+# DistilGPT2 on WikiText-2 (downloads itself): state-independent weight noise
+
+model:
+  builder: workloads.models:build_model
+  name: DistilGPT2
+
+dataset:
+  loader: workloads.dataset:get_llm_dataloader
+  params:
+    batch_size: 32
+    num_workers: 2
+    deterministic_dataloader: true
+    block_size: 128
+    tokenizer: gpt2
+  eval_params:
+    batch_size: 32
+    num_workers: 2
+    deterministic_dataloader: true
+    block_size: 128
+    tokenizer: gpt2
+
+input_stats:
+  N: 256
+
+adc_stats:
+  N: 256
+
+precise_mode_noise_sources:
+  - input_quantize
+  - weight_quantize
+  - adc_quantize
+
+params_grid_list:
+  - weight_clip_percentile: [99.999]
+    weight_bits: [10]
+    weight_slice_lsb_to_msb: [2]
+    weight_physical_noise:
+      - {type: StateIndependentNoise, sweep: {start: 0.0001, stop: 0.0014, step: 0.0001}}
+
+run:
+  N: 1930
+  mode: estimate
+  save_result: true

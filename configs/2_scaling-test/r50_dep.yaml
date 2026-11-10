@@ -1,0 +1,65 @@
+# Example config for CIM experiments
+
+model:
+  builder: workloads.models:build_model
+  name: ResNet50
+
+dataset:
+  loader: workloads.dataset:get_imagenet_dataloader
+  params:
+    batch_size: 24
+    num_workers: 2
+    deterministic_dataloader: true
+  eval_params:
+    batch_size: 64
+    num_workers: 2
+    deterministic_dataloader: true
+
+# Optional: override evaluation mode or metric function
+# evaluation:
+#   mode: classification
+#   metric_fn: accuracim.evaluation:update_performance_metrics
+
+paths:
+  # relative to the working directory (or CIM_ROOT)
+  # calibrated_dir: calibrated_config/ResNet50
+  # cache_dir: cache
+
+input_stats:
+  N: 512
+  override: false
+
+adc_stats:
+  N: 512
+  override: false
+
+precise_mode_noise_sources:
+  - input_quantize
+  - weight_quantize
+  - adc_quantize
+
+params_grid_list:
+  - weight_clip_percentile: [100]
+    weight_bits: [9]
+    differential_weight: [true]
+    weight_slice_lsb_to_msb: [3]
+    weight_physical_noise:
+     - type: ProportionalNoise
+       args: [0.01]
+     - type: ProportionalNoise
+       args: [0.02]
+     - type: ProportionalNoise
+       args: [0.04]
+     - type: ProportionalNoise
+       args: [0.06]
+     - type: ProportionalNoise
+       args: [0.08]
+     - type: ProportionalNoise
+       args: [0.10]
+     - type: ProportionalNoise
+       args: [0.12]
+
+run:
+  N: 50000
+  mode: estimate
+  save_result: true

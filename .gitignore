@@ -1,0 +1,13 @@
+build/
+dist/
+*.egg-info/
+__pycache__/
+*.pyc
+
+cache/
+results/
+calibrated_config/
+logs/
+
+# Datasets downloaded by the tutorial loaders (not workloads/data/)
+/data/

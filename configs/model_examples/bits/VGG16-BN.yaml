@@ -1,0 +1,39 @@
+# VGG16-BN: bit search (input and weight bits swept separately)
+
+model:
+  builder: workloads.models:build_model
+  name: VGG16-BN
+
+dataset:
+  loader: workloads.dataset:get_imagenet_dataloader
+  params:              # calibration
+    batch_size: 32
+    num_workers: 4
+    deterministic_dataloader: true
+  eval_params:         # sweep
+    batch_size: 50   # 200 does not fit 24 GB
+    num_workers: 4
+    deterministic_dataloader: true
+
+input_stats:
+  N: 256
+  override: false
+
+adc_stats:
+  N: 32  # unused (no ADC)
+  override: false
+
+params_grid_list:
+  - input_bits: [4, 5, 6, 7, 8, 10, 12, 14, 16]  # weights at full precision
+    input_clip_percentile: [100]
+    differential_weight: [true]
+  - weight_bits: [4, 5, 6, 7, 8, 10, 12, 14, 16]  # inputs at full precision
+    weight_clip_percentile: [100]
+    differential_weight: [true]
+
+run:
+  N: 50000
+  mode: simulate
+  quantization: noise_source  # vs full precision
+  save_result: true
+name: VGG16-BN_bits

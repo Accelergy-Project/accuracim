@@ -1,0 +1,46 @@
+# GPT2-XL: bit search (input and weight bits swept separately)
+
+model:
+  builder: workloads.models:build_model
+  name: GPT2-XL
+
+dataset:
+  loader: workloads.dataset:get_llm_dataloader
+  params:              # calibration
+    batch_size: 4
+    num_workers: 2
+    deterministic_dataloader: true
+    block_size: 128
+  eval_params:         # sweep
+    batch_size: 8
+    num_workers: 2
+    deterministic_dataloader: true
+    block_size: 128
+
+evaluation:
+  mode: next_token
+  metric_fn: accuracim.evaluation:update_performance_metrics
+
+input_stats:
+  N: 64
+  override: false
+
+adc_stats:
+  N: 16  # unused (no ADC)
+  override: false
+
+params_grid_list:
+  - input_bits: [4, 5, 6, 7, 8, 10, 12, 14, 16]  # weights at full precision
+    input_clip_percentile: [100]
+    differential_weight: [true]
+  - weight_bits: [4, 5, 6, 7, 8, 10, 12, 14, 16]  # inputs at full precision
+    weight_clip_percentile: [100]
+    differential_weight: [true]
+
+run:
+  N: 1930
+  mode: simulate
+  quantization: noise_source  # vs full precision
+  save_result: true
+  reuse_models: false   # fits a 24 GB GPU
+name: GPT2-XL_bits

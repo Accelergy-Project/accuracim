@@ -1,0 +1,5 @@
+# Formatting-only commits, skipped by `git blame` (GitHub reads this file automatically;
+# locally: git config blame.ignoreRevsFile .git-blame-ignore-revs)
+
+# Format with black (line length 100)
+72987f7d188d0f42dbe0c8ddff9f5689ab68db33
